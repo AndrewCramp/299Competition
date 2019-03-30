@@ -5,16 +5,16 @@
 //#define  LTHRESH 940
 //#define  CTHRESH 940
 //#define  RTHRESH 940
-#define  LTHRESH 865
-#define  CTHRESH 865
-#define  RTHRESH 865
+#define  LTHRESH 900
+#define  CTHRESH 900
+#define  RTHRESH 900
 #define  IRL A2
 #define  IRC A0
 #define  IRR A1
 #define txpin -1
 #define rxpin 11
-#define GRIP_SENSE A5
-#define GRIP_THRESH 1000
+#define GRIP_SENSE 5
+#define GRIP_THRESH 600
 #define GRIP_PIN 8
 #define TILT_PIN 9
 #define PAN_PIN 10
@@ -55,7 +55,7 @@ void setup() {
 }
 
 void loop() {
-   int path[15];
+   int path[12];
    int pLength;
    startPos();
    while(start){
@@ -66,18 +66,17 @@ void loop() {
        path[2] = 0;
        path[3] = 0;
        path[4] = 0;
+       
        path[5] = 0;
        path[6] = 0;
        path[7] = 0;
        path[8] = 0;
-       path[9] = 0;
-       path[10] = 0;
+       
 
-       path[11] = 1;
-       path[12] = 0;
-       path[13] = 0;
-       path[14] = 2;
-       pLength = 15;
+       path[9] = 1;
+       path[10] = 0;
+       path[11] = 2;
+       pLength = 12;
        start = 0;
      }
 //     if(Read character '1'){
@@ -119,6 +118,7 @@ void loop() {
         reverse();
         delay(325);
         stopRobot();
+        centerPos();
         pickUp();
         turnAround();
       }else{
@@ -131,7 +131,7 @@ void loop() {
 }
 
 void pathFollow(int path[], int intersection){
-  Serial.println(path[intersection]);
+
   if(path[intersection] == 0){
     delay(500);
   }else if(path[intersection] == 1){
@@ -192,7 +192,7 @@ int checkIntersection(){
   centrePin = analogRead(IRC);
   rightPin = analogRead(IRR);
   if ((leftPin >= LTHRESH)&&(centrePin >= CTHRESH)&&(rightPin >= RTHRESH)){
-    Serial.println("intersection");
+
     return 1;
   }else{
     return 0;
@@ -203,7 +203,7 @@ char beaconReceiver(){
   char val;
   while(1){
     val = myIRserial.receive(200);
-    Serial.println(val);
+
     if(val == '0'){
       return val;
     }
@@ -219,20 +219,21 @@ char beaconReceiver(){
 
 void turnAround(){
   reverse();
-  delay(300);
+  delay(800);
   digitalWrite(MLeft, 1);
   digitalWrite(MRight, 0);
     analogWrite(ELeft, 128);
   analogWrite(ERight, 128);
-  delay(500);
+  delay(1500);
   leftPin = analogRead(IRL);  
   centrePin = analogRead(IRC);
   rightPin = analogRead(IRR);
   while(centrePin <= CTHRESH){
+    Serial.println(centrePin);
   leftPin = analogRead(IRL);  
   centrePin = analogRead(IRC);
   rightPin = analogRead(IRR);
-  //  delay(1);
+    delay(1);
   }
   analogWrite(ELeft, 0);
   analogWrite(ERight, 0);
@@ -245,7 +246,7 @@ void startPos(){ //debugged n fine
   }
 
  void walkingPos(){ //vertical posn = 160 for us  debugged n fine
-  Serial.println("walking around now");
+
   panServo.write(90);
   tiltServo.write(160);
  }
@@ -253,7 +254,7 @@ void startPos(){ //debugged n fine
  
 int rangingStop(){
   int range = analogRead(RANGING_SENSOR_PIN);
-  Serial.println(range);
+
   if(range > RANGE_THRESHOLD){
     return 1;
   }
@@ -280,7 +281,6 @@ void closeGripper(){ //debugged n fine
  int i = 40;
    while(press < GRIP_THRESH){ //if closed on nothing
       press = analogRead(GRIP_SENSE);
-      Serial.println(press);
       gripServo.write(i);
       delay(50);
       if(i == 179){
@@ -290,9 +290,7 @@ void closeGripper(){ //debugged n fine
    }
    
  if(press >= GRIP_THRESH){ //if closing on something
-   Serial.println("closed");
     int angle = gripServo.read(); //angle gripper is at
-   Serial.println(angle);
   } 
 delay(1000);
 }
@@ -300,16 +298,14 @@ delay(1000);
 void dropOff(){ //have ball, bringing home
   gripServo.write(40);
   delay(100);
-  Serial.println("Dropping off");
   tiltServo.write(75);
   delay(1000); //this delay is necessary
   walkingPos();
 }
 
 void pickUp() { //getting from wall debugged n fine
-  Serial.println("Picking up");
   startPos();
-  tiltServo.write(75); //horizontal = 75 for us
+  tiltServo.write(65); //horizontal = 75 for us
   closeGripper();
   walkingPos(); 
 }
@@ -328,4 +324,31 @@ int checkGrip(){
   }
   return 0;
 }
+
+void centerPos(){
+  gripServo.write(179);
+  tiltServo.write(70);
+  panServo.write(0);
+  for (int i=0; i<80; i++){
+      panServo.write(i);
+      delay(50);
+  }
+  delay (1000); 
+  tiltServo.write(160); 
+  delay(1000); 
+  
+  gripServo.write(179);
+  panServo.write(180);
+  delay(1000); 
+  tiltServo.write(65);
+  for (int i=180; i>100; i--){
+      panServo.write(i);
+      delay(50);
+  }
+  delay(1000);
+  gripServo.write(40);
+  tiltServo.write(160);
+  delay(500);
+  panServo.write(90);
+ }
     
