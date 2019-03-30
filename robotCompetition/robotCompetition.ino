@@ -2,12 +2,12 @@
 #include <Servo.h>
 #define RANGING_SENSOR_PIN 3
 #define RANGE_THRESHOLD 605
-#define  LTHRESH 940
-#define  CTHRESH 940
-#define  RTHRESH 940
-//#define  LTHRESH 875
-//#define  CTHRESH 875
-//#define  RTHRESH 875
+//#define  LTHRESH 940
+//#define  CTHRESH 940
+//#define  RTHRESH 940
+#define  LTHRESH 865
+#define  CTHRESH 865
+#define  RTHRESH 865
 #define  IRL A2
 #define  IRC A0
 #define  IRR A1
@@ -30,6 +30,8 @@ int MRight = 7;
 int leftPin = 0;
 int centrePin = 0;
 int rightPin = 0;
+int bummper_left = 2;
+int bummper_right = 3;
 int start = 1;
 void setup() {
   Serial.begin(9600);
@@ -43,7 +45,8 @@ void setup() {
   pinMode(ELeft, OUTPUT);
   pinMode(ELeft, OUTPUT);
   pinMode(MLeft, OUTPUT);
-
+  pinMode(bummper_left, INPUT);
+  pinMode(bummper_right, INPUT);
     gripServo.attach(GRIP_PIN);
   tiltServo.attach(TILT_PIN); 
   panServo.attach(PAN_PIN);
@@ -52,7 +55,7 @@ void setup() {
 }
 
 void loop() {
-   int path[5];
+   int path[15];
    int pLength;
    startPos();
    while(start){
@@ -63,7 +66,18 @@ void loop() {
        path[2] = 0;
        path[3] = 0;
        path[4] = 0;
-       pLength = 5;
+       path[5] = 0;
+       path[6] = 0;
+       path[7] = 0;
+       path[8] = 0;
+       path[9] = 0;
+       path[10] = 0;
+
+       path[11] = 1;
+       path[12] = 0;
+       path[13] = 0;
+       path[14] = 2;
+       pLength = 15;
        start = 0;
      }
 //     if(Read character '1'){
@@ -74,18 +88,20 @@ void loop() {
 //     }
    }
   int traveled = 0;
-  int LeftSpeed = 100;
-  int RightSpeed = 100;
-  while(traveled < pLength){
-    LeftSpeed = 100;
-    RightSpeed = 100;
+  int LeftSpeed = 128;
+  int RightSpeed = 128;
+  while(traveled <= pLength){
+    LeftSpeed = 128;
+    RightSpeed = 128;
       leftPin = analogRead(IRL);  
   centrePin = analogRead(IRC);
   rightPin = analogRead(IRR);
     //If at an intersection perform task based on path
     if(checkIntersection()){
-      pathFollow(path, traveled);
-      traveled++;
+      if(traveled < pLength){
+        pathFollow(path, traveled);
+        traveled++;
+      }
     }
     if (leftPin > LTHRESH && centrePin < CTHRESH){
       RightSpeed += 20;
@@ -98,12 +114,18 @@ void loop() {
     analogWrite(ERight, RightSpeed);
     digitalWrite(MLeft, 1);
     digitalWrite(MRight, 1);
-    startPos();
-    if(rangingStop()){
-      stopRobot();
-      pickUp();
-      turnAround();
-      delay(5000);
+    if(wallStop()){
+      if(!checkGrip()){
+        reverse();
+        delay(325);
+        stopRobot();
+        pickUp();
+        turnAround();
+      }else{
+        stopRobot();
+        dropOff();
+        turnAround();
+      }
     }
   }
 }
@@ -196,16 +218,13 @@ char beaconReceiver(){
 }
 
 void turnAround(){
-  digitalWrite(MLeft, 0);
-  digitalWrite(MRight, 0);
-  analogWrite(ELeft, 128);
-  analogWrite(ERight, 128);
-  delay(2000);
+  reverse();
+  delay(300);
   digitalWrite(MLeft, 1);
   digitalWrite(MRight, 0);
     analogWrite(ELeft, 128);
   analogWrite(ERight, 128);
-  delay(1000);
+  delay(500);
   leftPin = analogRead(IRL);  
   centrePin = analogRead(IRC);
   rightPin = analogRead(IRR);
@@ -213,17 +232,16 @@ void turnAround(){
   leftPin = analogRead(IRL);  
   centrePin = analogRead(IRC);
   rightPin = analogRead(IRR);
-    delay(1);
+  //  delay(1);
   }
   analogWrite(ELeft, 0);
   analogWrite(ERight, 0);
 }
 void startPos(){ //debugged n fine 
   //starting position of the arm, pan - 90, vertical - 160, fully open - 40 
-  panServo.write(90);
+  panServo.write(96);
   tiltServo.write(160);
   gripServo.write(40);
-  delay(500);
   }
 
  void walkingPos(){ //vertical posn = 160 for us  debugged n fine
@@ -243,24 +261,32 @@ int rangingStop(){
     return 0;
 }
 
+int wallStop(){
+  int bl = digitalRead(bummper_left);
+  int br = digitalRead(bummper_right);
+  if(br && bl){
+    return 1;
+  }
+  return 0;
+}
+
 void stopRobot(){
    analogWrite(ELeft, 0);
     analogWrite(ERight, 0);
-    digitalWrite(MLeft, 1);
-    digitalWrite(MRight, 1);
 }
 
 void closeGripper(){ //debugged n fine 
- int finalGrip;
  int press = analogRead(GRIP_SENSE); 
- 
-
-     for(int i = 40; i < 180; i++){
+ int i = 40;
+   while(press < GRIP_THRESH){ //if closed on nothing
       press = analogRead(GRIP_SENSE);
       Serial.println(press);
       gripServo.write(i);
-      finalGrip = i;
       delay(50);
+      if(i == 179){
+        break;
+      }
+      i++;
    }
    
  if(press >= GRIP_THRESH){ //if closing on something
@@ -272,10 +298,11 @@ delay(1000);
 }
 
 void dropOff(){ //have ball, bringing home
+  gripServo.write(40);
+  delay(100);
   Serial.println("Dropping off");
   tiltServo.write(75);
   delay(1000); //this delay is necessary
-  gripServo.write(40);
   walkingPos();
 }
 
@@ -285,5 +312,20 @@ void pickUp() { //getting from wall debugged n fine
   tiltServo.write(75); //horizontal = 75 for us
   closeGripper();
   walkingPos(); 
+}
+
+void reverse(){
+  digitalWrite(MLeft, 0);
+  digitalWrite(MRight, 0);
+  analogWrite(ELeft, 128);
+  analogWrite(ERight, 128);
+}
+
+int checkGrip(){
+  int press = analogRead(GRIP_SENSE); 
+  if(press > GRIP_THRESH){
+    return 1;
+  }
+  return 0;
 }
     
