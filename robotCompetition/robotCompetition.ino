@@ -5,9 +5,9 @@
 //#define  LTHRESH 940
 //#define  CTHRESH 940
 //#define  RTHRESH 940
-#define  LTHRESH 900
-#define  CTHRESH 900
-#define  RTHRESH 900
+#define  LTHRESH 915
+#define  CTHRESH 915
+#define  RTHRESH 915
 #define  IRL A2
 #define  IRC A0
 #define  IRR A1
@@ -55,12 +55,12 @@ void setup() {
 }
 
 void loop() {
-   int path[12];
+   int path[43];
    int pLength;
-   startPos();
+startPos();
    while(start){
 
-     if(1){
+//     if(1){
        path[0] = 0;
        path[1] = 0;
        path[2] = 0;
@@ -76,15 +76,177 @@ void loop() {
        path[9] = 1;
        path[10] = 0;
        path[11] = 2;
-       pLength = 12;
+
+       path[12] = 0;
+       path[13] = 0;
+       path[14] = 2;
+       path[15] = 0;
+       path[16] = 0;
+       path[17] = 0;
+       path[18] = 0;
+       path[19] = 0;
+       path[20] = 1;
+       path[21] = 0;
+       path[22] = 0;
+
+       path[23] = 0;
+       path[24] = 0;
+       path[25] = 0;
+       path[26] = 1;
+       path[27] = 0;
+       path[28] = 2;
+       path[29] = 0;
+       path[30] = 0;
+       path[31] = 0;
+
+       path[32] = 0;
+       path[33] = 0;
+       path[34] = 0;
+       path[35] = 0;
+       path[36] = 1;
+       path[37] = 0;
+       path[38] = 2;
+       path[39] = 0;
+       path[40] = 0;
+       path[41] = 0;
+       path[42] = 0;      
+       
+       pLength = 43;
        start = 0;
+//     }
+  //   if(1){
+      //1 is Left-Hand Turn, 2 is Right-Hand Turn, 0 is go straight
+      //Proceed to (1)
+       path[0] = 0;
+       path[1] = 0;
+       path[2] = 0;
+       path[3] = 0;
+       path[4] = 0;
+       //Hit (1), Turn Around (ignore next intersection)
+       path[5] = 0;
+       path[6] = 0;
+       path[7] = 0;
+       path[8] = 0;
+       //Hit Goal, Turn Around
+       //Proceed to (2)
+       path[9] = 0;
+       path[10] = 1;
+       path[11] = 0;
+       path[12] = 0;
+       //Hit (2), Turn Around (ignore next intersection) 
+       path[13] = 0;
+       path[14] = 2;
+       path[15] = 0;
+       //Hit Goal, Turn Around
+       //Proceed to (4), to avoid collision with Left Robot on Path (3)
+       path[16] = 0;
+       path[17] = 0;
+       path[18] = 0;
+       path[19] = 0;
+       path[20] = 1;
+       path[21] = 0;
+       path[22] = 2;
+       //Hit (4), Turn Around (ignore next intersection o o f)
+       path[23] = 1;
+       path[24] = 0;
+       path[25] = 2;
+       path[26] = 0;
+       path[27] = 0;
+       path[28] = 0;
+       //Hit Goal Turn round
+       //Proceed to (3) 
+       path[29] = 0;
+       path[30] = 2;
+       path[31] = 0;
+       path[32] = 0;
+       //Hit (3), Turn Around (ignore next intersection)
+       path[33] = 0;
+       path[34] = 1;
+       path[35] = 0;
+       //Hit Goal, Turn Around
+       //Proceed to (5)
+       path[36] = 0;
+       path[37] = 0;
+       path[38] = 0;
+       path[39] = 0;
+       path[40] = 2;
+       path[41] = 0;
+       path[42] = 0;
+       //Hit (5), Turn Around (ignore next intersection)
+       path[43] = 0;
+       path[44] = 1;
+       path[45] = 0;
+       path[46] = 0;
+       path[47] = 0;
+       path[48] = 0;
+       //Hit Goal
+       pLength = 49;
+       start = 0;
+    // }
+    if(1){
+      //1 is Left-Hand Turn, 2 is Right-Hand Turn, 0 is go straight
+      //Proceed to (1)
+       path[0] = 0;
+       path[1] = 0;
+       path[2] = 0;
+       path[3] = 0;
+       path[4] = 0;
+       //Hit (1), Turn Around (ignore next intersection)
+       path[5] = 0;
+       path[6] = 0;
+       path[7] = 0;
+       path[8] = 0;
+       //Hit Goal, Turn Around
+       //Proceed to (2)
+       path[9] = 0;
+       path[10] = 0;
+       path[11] = 1;
+       path[12] = 0;
+       path[13] = 0;
+       path[14] = 0;
+       //Hit (2), Turn Around (ignore next intersection) 
+       path[15] = 0;
+       path[16] = 0;
+       path[17] = 2;
+       path[18] = 0;
+       path[19] = 0;
+       //Hit Goal, Turn Around
+       //Proceed to (3)       
+       path[20] = 2;
+       path[21] = 0;
+       //Hit (3), Turn Around (ignore next intersection)
+       path[22] = 1;
+       //Hit Goal Turn round
+       //Proceed to (4)
+       path[23] = 0;
+       path[24] = 0;
+       path[25] = 0;
+       path[26] = 0;
+       path[27] = 2;
+       path[28] = 1;
+       //Hit (4), Turn Around (ignore next intersection)
+       path[29] = 2;       
+       path[30] = 1;
+       path[31] = 0;
+       path[32] = 0;
+       path[33] = 0;
+       //Hit Goal, Turn Around
+       //Proceed to (5)
+       path[34] = 0;
+       path[35] = 0;
+       path[36] = 0;
+       path[37] = 2;
+       path[38] = 0;
+       //Hit (5), Turn Around (ignore next intersection)
+       path[39] = 1;
+       path[40] = 0;
+       path[41] = 0;
+       path[42] = 0;
+       //Hit Goal
+       pLength = 43;
+       start = 0;
+     start = 0;
      }
-//     if(Read character '1'){
-//       start = 0;
-//     }
-//     if(Read character '2'){
-//       start = 0;
-//     }
    }
   int traveled = 0;
   int LeftSpeed = 128;
@@ -103,16 +265,17 @@ void loop() {
       }
     }
     if (leftPin > LTHRESH && centrePin < CTHRESH){
-      RightSpeed += 20;
-      LeftSpeed -= 20;
+      RightSpeed += 30;
+      LeftSpeed -= 30;
     }else if (rightPin > RTHRESH && centrePin < CTHRESH){
-      LeftSpeed += 20;
-      RightSpeed -=20;
+      LeftSpeed += 30;
+      RightSpeed -=30;
     }
     analogWrite(ELeft, LeftSpeed);
     analogWrite(ERight, RightSpeed);
     digitalWrite(MLeft, 1);
     digitalWrite(MRight, 1);
+    delay(10);
     if(wallStop()){
       if(!checkGrip()){
         reverse();
@@ -133,7 +296,7 @@ void loop() {
 void pathFollow(int path[], int intersection){
 
   if(path[intersection] == 0){
-    delay(500);
+    delay(200);
   }else if(path[intersection] == 1){
     turnLeft();
   }else if(path[intersection] == 2){
@@ -224,11 +387,11 @@ void turnAround(){
   digitalWrite(MRight, 0);
     analogWrite(ELeft, 128);
   analogWrite(ERight, 128);
-  delay(1500);
+  delay(1400);
   leftPin = analogRead(IRL);  
   centrePin = analogRead(IRC);
   rightPin = analogRead(IRR);
-  while(centrePin <= CTHRESH){
+  while(centrePin <= 900){
     Serial.println(centrePin);
   leftPin = analogRead(IRL);  
   centrePin = analogRead(IRC);
@@ -305,7 +468,7 @@ void dropOff(){ //have ball, bringing home
 
 void pickUp() { //getting from wall debugged n fine
   startPos();
-  tiltServo.write(65); //horizontal = 75 for us
+  tiltServo.write(75); //horizontal = 75 for us
   closeGripper();
   walkingPos(); 
 }
@@ -327,9 +490,9 @@ int checkGrip(){
 
 void centerPos(){
   gripServo.write(179);
-  tiltServo.write(70);
-  panServo.write(0);
-  for (int i=0; i<80; i++){
+  tiltServo.write(85);
+  panServo.write(50);
+  for (int i=50; i<85; i++){
       panServo.write(i);
       delay(50);
   }
@@ -338,10 +501,10 @@ void centerPos(){
   delay(1000); 
   
   gripServo.write(179);
-  panServo.write(180);
+  panServo.write(130);
   delay(1000); 
-  tiltServo.write(65);
-  for (int i=180; i>100; i--){
+  tiltServo.write(85);
+  for (int i=130; i>105; i--){
       panServo.write(i);
       delay(50);
   }
