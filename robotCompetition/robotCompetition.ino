@@ -33,6 +33,7 @@ int rightPin = 0;
 int bummper_left = 2;
 int bummper_right = 3;
 int start = 1;
+int returning = 0;
 void setup() {
   Serial.begin(9600);
   pinMode(rxpin, INPUT);
@@ -277,17 +278,17 @@ startPos();
     digitalWrite(MRight, 1);
     delay(10);
     if(wallStop()){
-      if(!checkGrip()){
+      if(!returning){
         reverse();
         delay(325);
         stopRobot();
         centerPos();
         pickUp();
-        turnAround();
+        turnAround(2);
       }else{
         stopRobot();
         dropOff();
-        turnAround();
+        turnAround(1);
       }
     }
   }
@@ -380,33 +381,62 @@ char beaconReceiver(){
   }
 }
 
-void turnAround(){
-  reverse();
-  delay(800);
-  digitalWrite(MLeft, 1);
-  digitalWrite(MRight, 0);
-    analogWrite(ELeft, 128);
-  analogWrite(ERight, 128);
-  delay(1400);
-  leftPin = analogRead(IRL);  
-  centrePin = analogRead(IRC);
-  rightPin = analogRead(IRR);
-  while(centrePin <= 900){
-    Serial.println(centrePin);
-  leftPin = analogRead(IRL);  
-  centrePin = analogRead(IRC);
-  rightPin = analogRead(IRR);
-    delay(1);
-  }
-  analogWrite(ELeft, 0);
-  analogWrite(ERight, 0);
-}
+//void turnAround(){
+//  reverse();
+//  delay(800);
+//  digitalWrite(MLeft, 1);
+//  digitalWrite(MRight, 0);
+//    analogWrite(ELeft, 128);
+//  analogWrite(ERight, 128);
+//  delay(1400);
+//  leftPin = analogRead(IRL);  
+//  centrePin = analogRead(IRC);
+//  rightPin = analogRead(IRR);
+//  while(centrePin <= 900){
+//    Serial.println(centrePin);
+//  leftPin = analogRead(IRL);  
+//  centrePin = analogRead(IRC);
+//  rightPin = analogRead(IRR);
+//    delay(1);
+//  }
+//  analogWrite(ELeft, 0);
+//  analogWrite(ERight, 0);
+//}
 void startPos(){ //debugged n fine 
   //starting position of the arm, pan - 90, vertical - 160, fully open - 40 
   panServo.write(96);
   tiltServo.write(160);
   gripServo.write(40);
   }
+
+void turnAround(int number){
+  reverse();
+  delay(800);
+  digitalWrite(MLeft, 1);
+  digitalWrite(MRight, 0);
+    analogWrite(ELeft, 128);
+  analogWrite(ERight, 128);
+  delay(200);
+  leftPin = analogRead(IRL);  
+  centrePin = analogRead(IRC);
+  rightPin = analogRead(IRR);
+  int count = 0;
+  while(count < number){
+    Serial.println(centrePin);
+  leftPin = analogRead(IRL);  
+  centrePin = analogRead(IRC);
+  rightPin = analogRead(IRR);
+  if(centrePin > 900){
+    count++;
+    if(count <= number-1){
+    delay(200);
+    }
+  }
+  }
+  analogWrite(ELeft, 0);
+  analogWrite(ERight, 0);
+}
+
 
  void walkingPos(){ //vertical posn = 160 for us  debugged n fine
 
@@ -446,7 +476,8 @@ void closeGripper(){ //debugged n fine
       press = analogRead(GRIP_SENSE);
       gripServo.write(i);
       delay(50);
-      if(i == 179){
+      if(i > 130){
+        gripServo.write(40);
         break;
       }
       i++;
@@ -464,6 +495,7 @@ void dropOff(){ //have ball, bringing home
   tiltServo.write(75);
   delay(1000); //this delay is necessary
   walkingPos();
+  returning = 0;
 }
 
 void pickUp() { //getting from wall debugged n fine
@@ -471,6 +503,7 @@ void pickUp() { //getting from wall debugged n fine
   tiltServo.write(75); //horizontal = 75 for us
   closeGripper();
   walkingPos(); 
+  returning = 1;
 }
 
 void reverse(){
