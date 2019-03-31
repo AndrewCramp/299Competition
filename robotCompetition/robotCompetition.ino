@@ -63,8 +63,8 @@ void loop() {
    int pLength;
 startPos();
    while(start){
-
-    if(1){
+    int p = beaconReceiver();
+    if(p==0){
        path[0] = 0;
        path[1] = 0;
        path[2] = 0;
@@ -113,11 +113,10 @@ startPos();
        path[39] = 0;
        path[40] = 0;
        path[41] = 0;
-       path[42] = 0;      
-       
+       path[42] = 0;            
        pLength = 43;
        start = 0;
-     }else if(1){
+     }else if(p==1){
       //1 is Left-Hand Turn, 2 is Right-Hand Turn, 0 is go straight
       //Proceed to (1)
        path[0] = 0;
@@ -185,7 +184,7 @@ startPos();
        //Hit Goal
        pLength = 49;
        start = 0;
-     }else if(1){
+     }else if(p==2){
       //1 is Left-Hand Turn, 2 is Right-Hand Turn, 0 is go straight
       //Proceed to (1)
        path[0] = 0;
@@ -391,6 +390,27 @@ char beaconReceiver(){
     }
     else if(val == '2'){
       return val;
+    }
+    int bl = digitalRead(bummper_left);
+    int br = digitalRead(bummper_right);
+    if(bl){
+      delay(100);
+    bl = digitalRead(bummper_left);
+    br = digitalRead(bummper_right);
+      if(bl && br){
+        return 1;
+      }
+      return 0;
+    }
+
+    if(br){
+      delay(100);
+       bl = digitalRead(bummper_left);
+    br = digitalRead(bummper_right);
+      if(bl && br){
+        return 1;
+      }
+      return 2;
     }
     delay(100);
   }
