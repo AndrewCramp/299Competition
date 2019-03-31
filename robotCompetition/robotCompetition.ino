@@ -36,6 +36,7 @@ int start = 1;
 //For used battery 128
 //for new battery 114
 int turnSpeed = 114;
+int returning = 0;
 void setup() {
   Serial.begin(9600);
   pinMode(rxpin, INPUT);
@@ -58,12 +59,12 @@ void setup() {
 }
 
 void loop() {
-   int path[43];
+   int path[49];
    int pLength;
 startPos();
    while(start){
 
-//     if(1){
+    if(1){
        path[0] = 0;
        path[1] = 0;
        path[2] = 0;
@@ -116,8 +117,7 @@ startPos();
        
        pLength = 43;
        start = 0;
-//     }
-  //   if(1){
+     }else if(1){
       //1 is Left-Hand Turn, 2 is Right-Hand Turn, 0 is go straight
       //Proceed to (1)
        path[0] = 0;
@@ -185,68 +185,67 @@ startPos();
        //Hit Goal
        pLength = 49;
        start = 0;
-    // }
-    if(1){
+     }else if(1){
       //1 is Left-Hand Turn, 2 is Right-Hand Turn, 0 is go straight
       //Proceed to (1)
-//       path[0] = 0;
-//       path[1] = 0;
-//       path[2] = 0;
-//       path[3] = 0;
-//       path[4] = 0;
-//       //Hit (1), Turn Around (ignore next intersection)
-//       path[5] = 0;
-//       path[6] = 0;
-//       path[7] = 0;
-//       path[8] = 0;
-//       //Hit Goal, Turn Around
-//       //Proceed to (2)
-//       path[9] = 0;
-//       path[10] = 0;
-//       path[11] = 1;
-//       path[12] = 0;
-//       path[13] = 0;
-//       path[14] = 0;
-//       //Hit (2), Turn Around (ignore next intersection) 
-//       path[15] = 0;
-//       path[16] = 0;
-//       path[17] = 2;
-//       path[18] = 0;
-//       path[19] = 0;
-//       //Hit Goal, Turn Around
-//       //Proceed to (3)       
-//       path[20] = 2;
-//       path[21] = 0;
-//       //Hit (3), Turn Around (ignore next intersection)
-//       path[22] = 1;
-//       //Hit Goal Turn round
-//       //Proceed to (4)
-//       path[23] = 0;
-//       path[24] = 0;
-//       path[25] = 0;
-//       path[26] = 0;
-//       path[27] = 2;
-//       path[28] = 1;
-//       //Hit (4), Turn Around (ignore next intersection)
-//       path[29] = 2;       
-//       path[30] = 1;
-//       path[31] = 0;
-//       path[32] = 0;
-//       path[33] = 0;
-//       //Hit Goal, Turn Around
-//       //Proceed to (5)
-//       path[34] = 0;
-//       path[35] = 0;
-//       path[36] = 0;
-//       path[37] = 2;
-//       path[38] = 0;
-//       //Hit (5), Turn Around (ignore next intersection)
-//       path[39] = 1;
-//       path[40] = 0;
-//       path[41] = 0;
-//       path[42] = 0;
-//       //Hit Goal
-//       pLength = 43;
+       path[0] = 0;
+       path[1] = 0;
+       path[2] = 0;
+       path[3] = 0;
+       path[4] = 0;
+       //Hit (1), Turn Around (ignore next intersection)
+       path[5] = 0;
+       path[6] = 0;
+       path[7] = 0;
+       path[8] = 0;
+       //Hit Goal, Turn Around
+       //Proceed to (2)
+       path[9] = 0;
+       path[10] = 0;
+       path[11] = 1;
+       path[12] = 0;
+       path[13] = 0;
+       path[14] = 0;
+       //Hit (2), Turn Around (ignore next intersection) 
+       path[15] = 0;
+       path[16] = 0;
+       path[17] = 2;
+       path[18] = 0;
+       path[19] = 0;
+       //Hit Goal, Turn Around
+       //Proceed to (3)       
+       path[20] = 2;
+       path[21] = 0;
+       //Hit (3), Turn Around (ignore next intersection)
+       path[22] = 1;
+       //Hit Goal Turn round
+       //Proceed to (4)
+       path[23] = 0;
+       path[24] = 0;
+       path[25] = 0;
+       path[26] = 0;
+       path[27] = 2;
+       path[28] = 1;
+       //Hit (4), Turn Around (ignore next intersection)
+       path[29] = 2;       
+       path[30] = 1;
+       path[31] = 0;
+       path[32] = 0;
+       path[33] = 0;
+       //Hit Goal, Turn Around
+       //Proceed to (5)
+       path[34] = 0;
+       path[35] = 0;
+       path[36] = 0;
+       path[37] = 2;
+       path[38] = 0;
+       //Hit (5), Turn Around (ignore next intersection)
+       path[39] = 1;
+       path[40] = 0;
+       path[41] = 0;
+       path[42] = 0;
+       //Hit Goal
+       pLength = 43;
      start = 0;
      }
    }
@@ -279,7 +278,7 @@ startPos();
     digitalWrite(MRight, 1);
     delay(10);
     if(wallStop()){
-      if(!checkGrip()){
+      if(!returning){
         reverse();
         delay(325);
         stopRobot();
@@ -291,6 +290,21 @@ startPos();
         dropOff();
         turnAround();
       }
+      if(traveled == pLength){
+      reverse();
+      delay(325);
+      while(1){
+      digitalWrite(MLeft, 1);
+      digitalWrite(MRight, 0);
+      analogWrite(ELeft, 128);
+      analogWrite(ERight, 128);
+      for(int i = 30; i < 150; i++){
+         tiltServo.write(i);
+        delay(10);
+      }
+      }
+      
+    }
     }
   }
 }
@@ -384,7 +398,7 @@ char beaconReceiver(){
 
 void turnAround(){
   reverse();
-  delay(800);
+  delay(900);
   digitalWrite(MLeft, 1);
   digitalWrite(MRight, 0);
     analogWrite(ELeft, turnSpeed);
@@ -468,13 +482,15 @@ void dropOff(){ //have ball, bringing home
   tiltServo.write(75);
   delay(1000); //this delay is necessary
   walkingPos();
+  returning = 0;
 }
 
 void pickUp() { //getting from wall debugged n fine
   startPos();
   tiltServo.write(75); //horizontal = 75 for us
   closeGripper();
-  walkingPos(); 
+  walkingPos();
+  returning = 1; 
 }
 
 void reverse(){
